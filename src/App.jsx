@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision'
 import './App.css'
 
@@ -38,6 +38,7 @@ function App() {
   const videoRef = useRef(null)
   const displayCanvasRef = useRef(null)
   const boardCanvasRef = useRef(null)
+  const boardContextRef = useRef(null)
   const handLandmarkerRef = useRef(null)
   const animationFrameRef = useRef(null)
   const streamRef = useRef(null)
@@ -51,55 +52,51 @@ function App() {
 
   const [status, setStatus] = useState('Ready')
   const [currentTool, setCurrentTool] = useState(COLORS[2].name)
+  const [currentToolHex, setCurrentToolHex] = useState(COLORS[2].hex)
   const [brushSize, setBrushSize] = useState(7)
   const [theme, setTheme] = useState('dark')
   const [cameraReady, setCameraReady] = useState(false)
 
-  const boardContext = useMemo(() => {
-    const boardCanvas = document.createElement('canvas')
-    boardCanvas.width = BOARD_WIDTH
-    boardCanvas.height = BOARD_HEIGHT
-    const ctx = boardCanvas.getContext('2d')
-    ctx.fillStyle = '#ffffff'
-    ctx.fillRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT)
-    boardCanvasRef.current = boardCanvas
-    return ctx
-  }, [])
-
-  const updateStatus = (nextStatus) => {
+  const updateStatus = useCallback((nextStatus) => {
     if (statusRef.current !== nextStatus) {
       statusRef.current = nextStatus
       setStatus(nextStatus)
     }
-  }
+  }, [])
 
-  const updateTool = (tool) => {
+  const updateTool = useCallback((tool) => {
     if (currentToolRef.current !== tool.name) {
       currentToolRef.current = tool.name
       setCurrentTool(tool.name)
+      setCurrentToolHex(tool.hex)
     }
-  }
+  }, [])
 
-  const clearBoard = () => {
-    boardContext.fillStyle = '#ffffff'
-    boardContext.fillRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT)
+  const clearBoard = useCallback(() => {
+    if (!boardContextRef.current) return
+    boardContextRef.current.fillStyle = '#ffffff'
+    boardContextRef.current.fillRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT)
     previousPointRef.current = null
     updateStatus('Canvas cleared')
-  }
+  }, [updateStatus])
 
-  const setPenFromPalette = (color) => {
-    penColorRef.current = color
-    updateTool(color)
-    updateStatus('Pen color changed')
-  }
+  const setPenFromPalette = useCallback(
+    (color) => {
+      penColorRef.current = color
+      updateTool(color)
+      updateStatus('Pen color changed')
+    },
+    [updateStatus, updateTool],
+  )
 
-  const saveBoard = () => {
+  const saveBoard = useCallback(() => {
+    if (!boardCanvasRef.current) return
     const link = document.createElement('a')
     link.href = boardCanvasRef.current.toDataURL('image/png')
-    link.download = `drawing_${Date.now()}.png`
+    link.download = 'drawing.png'
     link.click()
     updateStatus('Drawing downloaded as PNG')
-  }
+  }, [updateStatus])
 
   useEffect(() => {
     brushSizeRef.current = brushSize
@@ -108,6 +105,19 @@ function App() {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
   }, [theme])
+
+  useEffect(() => {
+    const boardCanvas = document.createElement('canvas')
+    boardCanvas.width = BOARD_WIDTH
+    boardCanvas.height = BOARD_HEIGHT
+
+    const boardContext = boardCanvas.getContext('2d')
+    boardContext.fillStyle = '#ffffff'
+    boardContext.fillRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT)
+
+    boardCanvasRef.current = boardCanvas
+    boardContextRef.current = boardContext
+  }, [])
 
   useEffect(() => {
     let isMounted = true
@@ -139,6 +149,7 @@ function App() {
       if (cursorPoint) {
         const cx = offsetX + Math.floor(cursorPoint.x * (displayWidth / BOARD_WIDTH))
         const cy = offsetY + Math.floor(cursorPoint.y * (displayHeight / BOARD_HEIGHT))
+
         ctx.beginPath()
         ctx.fillStyle = '#000000'
         ctx.arc(cx, cy, Math.max(6, brushSizeRef.current), 0, Math.PI * 2)
@@ -154,7 +165,9 @@ function App() {
     const processFrame = () => {
       const video = videoRef.current
       const handLandmarker = handLandmarkerRef.current
-      if (!video || !handLandmarker) {
+      const boardContext = boardContextRef.current
+
+      if (!video || !handLandmarker || !boardContext) {
         animationFrameRef.current = requestAnimationFrame(processFrame)
         return
       }
@@ -172,6 +185,7 @@ function App() {
 
           const fingers = getFingerStates(mirroredLandmarks)
           const indexPoint = mirroredLandmarks[8]
+
           cursorPoint = {
             x: Math.round(indexPoint.x * BOARD_WIDTH),
             y: Math.round(indexPoint.y * BOARD_HEIGHT),
@@ -242,7 +256,7 @@ function App() {
         if (!isMounted) return
         setCameraReady(true)
         animationFrameRef.current = requestAnimationFrame(processFrame)
-      } catch (error) {
+      } catch {
         updateStatus('Camera permission denied or unavailable')
       }
     }
@@ -253,11 +267,9 @@ function App() {
       isMounted = false
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current)
       if (handLandmarkerRef.current) handLandmarkerRef.current.close()
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => track.stop())
-      }
+      if (streamRef.current) streamRef.current.getTracks().forEach((track) => track.stop())
     }
-  }, [boardContext])
+  }, [clearBoard, updateStatus, updateTool])
 
   return (
     <div className="app-shell">
@@ -298,7 +310,7 @@ function App() {
           <div className="palette">
             <p>Pen Colors</p>
             <div className="current-tool">
-              <span className="dot" style={{ backgroundColor: penColorRef.current.hex }} />
+              <span className="dot" style={{ backgroundColor: currentToolHex }} />
               <span>{currentTool}</span>
             </div>
             {COLORS.map((color) => (
