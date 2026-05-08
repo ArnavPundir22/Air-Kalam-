@@ -1,7 +1,9 @@
-# Virtual environment
-.venv/
+# Node
+node_modules/
+dist/
 
-# Python cache
+# Python
+.venv/
 __pycache__/
 *.pyc
 
