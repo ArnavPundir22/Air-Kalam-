@@ -1,0 +1,135 @@
+.app-shell {
+  min-height: 100vh;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.app-header {
+  margin-bottom: 1rem;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.app-header p {
+  margin-top: 0.4rem;
+  opacity: 0.8;
+}
+
+.app-main {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 1rem;
+}
+
+.board-section {
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 0.75rem;
+}
+
+.board-canvas {
+  width: 100%;
+  height: min(70vh, 720px);
+  display: block;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.controls-section {
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.controls-section h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.camera-block p,
+.palette p {
+  margin: 0 0 0.4rem 0;
+  font-weight: 600;
+}
+
+.camera-preview {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  transform: scaleX(-1);
+  background: #111;
+}
+
+.camera-status {
+  display: inline-block;
+  margin-top: 0.35rem;
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+
+.buttons-grid,
+.palette {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+button {
+  border: 1px solid var(--border-color);
+  background: var(--button-bg);
+  color: var(--text-color);
+  border-radius: 8px;
+  padding: 0.55rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+button:hover {
+  filter: brightness(1.04);
+}
+
+.current-tool {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.95rem;
+}
+
+.dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid #222;
+}
+
+.brush-control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.status-bar {
+  margin-top: 0.9rem;
+  padding: 0.7rem;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--panel-bg);
+}
+
+@media (max-width: 1000px) {
+  .app-main {
+    grid-template-columns: 1fr;
+  }
+
+  .board-canvas {
+    height: 55vh;
+  }
+}
