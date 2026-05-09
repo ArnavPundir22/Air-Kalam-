@@ -22,7 +22,7 @@ Gesture-controlled virtual whiteboard built with **React + Vite + MediaPipe**.
 |---|---|
 | ☝️ Right-hand index finger up | Draw |
 | ✌️ Right-hand index + middle finger | Pause drawing |
-| ✋ Right hand all fingers open | Clear canvas |
+| ✋ Right-hand all fingers open | Clear canvas |
 | 🤙 Right-hand pinky finger only | Eraser mode |
 
 ## Tech Stack
