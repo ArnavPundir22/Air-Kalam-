@@ -21,6 +21,19 @@ const ERASER = { name: 'Eraser', rgb: [255, 255, 255], hex: '#ffffff' }
 
 const sameGesture = (a, b) => a.length === b.length && a.every((value, index) => value === b[index])
 
+const getRightHandLandmarks = (result) => {
+  if (!result.landmarks.length) return null
+
+  const handednessList = result.handednesses ?? result.handedness ?? []
+  const rightHandIndex = handednessList.findIndex((handedness) => {
+    const category = Array.isArray(handedness) ? handedness[0] : handedness
+    return category?.categoryName?.toLowerCase() === 'right'
+  })
+
+  if (rightHandIndex === -1) return null
+  return result.landmarks[rightHandIndex] ?? null
+}
+
 const getFingerStates = (landmarks) => {
   const fingers = []
   fingers.push(landmarks[4].x > landmarks[3].x ? 1 : 0)
@@ -177,8 +190,10 @@ function App() {
         lastVideoTimeRef.current = video.currentTime
 
         const result = handLandmarker.detectForVideo(video, performance.now())
-        if (result.landmarks.length > 0) {
-          const mirroredLandmarks = result.landmarks[0].map((landmark) => ({
+        const rightHandLandmarks = getRightHandLandmarks(result)
+
+        if (rightHandLandmarks) {
+          const mirroredLandmarks = rightHandLandmarks.map((landmark) => ({
             x: 1 - landmark.x,
             y: landmark.y,
           }))
@@ -220,6 +235,7 @@ function App() {
             }
           }
         } else {
+          drawingRef.current = false
           previousPointRef.current = null
         }
       }
