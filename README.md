@@ -8,7 +8,7 @@ Gesture-controlled virtual whiteboard built with **React + Vite + MediaPipe**.
 
 ## Features
 
-- Real-time hand tracking in the browser
+- Real-time right-hand tracking in the browser
 - Air drawing with index finger gesture
 - Pause gesture, clear gesture, and pinky eraser gesture
 - Brush size and pen color controls
@@ -20,11 +20,12 @@ Gesture-controlled virtual whiteboard built with **React + Vite + MediaPipe**.
 
 | Gesture | Action |
 |---|---|
-| ☝️ Index finger up | Draw |
-| ✌️ Index + Middle finger | Pause drawing |
-| ✋ All fingers open | Clear canvas |
-| 🤙 Pinky finger only | Eraser mode |
+| ☝️ Right-hand index finger up | Draw |
+| ✌️ Right-hand index + middle finger | Pause drawing |
+| ✋ Right-hand all fingers open | Clear canvas |
+| 🤙 Right-hand pinky finger only | Eraser mode |
 
+---
 ## Tech Stack
 
 - React
